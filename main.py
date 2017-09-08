@@ -5,13 +5,22 @@ import time
 from threading import Thread
 
 
+devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 
-device = evdev.InputDevice('/dev/input/event0')
+print("Devices:")
+for q in devices:
+	if q.name == "FT5406 memory based driver":
+		device = evdev.InputDevice(q.fn)
+	print(q.fn, q.name, q.phys)
+
+print("Picked device:")
 print(device)
+time.sleep(2)
 
 #### Scan Time (s) ####
 scan_time = 10;
 #######################
+
 
 def read_touchscreen():
 	#Variables
@@ -41,7 +50,8 @@ def update_location():
 		if ((time.time() - prev_time) > 1):
 			if (itteration < scan_time):
 			    os.system('clear')
-			    print(itteration)
+			    current_seconds = "Time: %d out of %d (s)" % (itteration+1,scan_time)
+			    print(current_seconds)
 			    print(locations)
 
 			    loc_matrix[itteration] = locations
