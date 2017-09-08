@@ -3,11 +3,15 @@ import numpy as np
 import os
 import time
 from threading import Thread
-import matplotlib.pyplot as plt
+
 
 
 device = evdev.InputDevice('/dev/input/event0')
 print(device)
+
+#### Scan Time (s) ####
+scan_time = 10;
+#######################
 
 def read_touchscreen():
 	#Variables
@@ -15,7 +19,7 @@ def read_touchscreen():
 	locations = np.zeros((10,2))
 	finger = 0
 
-	for event in device.read_loop():
+	for event in device.read_loop():   #Read the device loop 
 		if event.type == evdev.ecodes.EV_ABS:
 			if event.code == evdev.ecodes.ABS_MT_SLOT:
 				finger = event.value
@@ -30,12 +34,24 @@ def read_touchscreen():
 
 def update_location():
 	prev_time = time.time()
+	global itteration
 	itteration = 0
+	loc_matrix = np.zeros((60,10,2))
 	while 1:
-		if (time.time() - prev_time) > 1:
-		    os.system('clear')
-		    print(locations)
-		    prev_time = time.time()
+		if ((time.time() - prev_time) > 1):
+			if (itteration < scan_time):
+			    os.system('clear')
+			    print(itteration)
+			    print(locations)
+
+			    loc_matrix[itteration] = locations
+			    prev_time = time.time()
+			    itteration += 1
+			else:
+				np.save("loc_matrix",loc_matrix)
+				print("done!")
+				os._exit(1)
+
 
 # def store_data():
 # 	prev_time = time.time()
@@ -52,4 +68,3 @@ def update_location():
 
 Thread(target = read_touchscreen).start()
 Thread(target = update_location).start()
-Thread(target = create_image).start()
