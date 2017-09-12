@@ -7,15 +7,15 @@ import pickle
 
 devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 
-print("devices:")
+print("\ndevices:")
 for q in devices:
 	if q.name == "FT5406 memory based driver":
 		device = evdev.InputDevice(q.fn)
 	print(q.fn, q.name, q.phys)
 
-print("picked device:")
+print("\npicked device:")
 print(device)
-time.sleep(2)
+# time.sleep(2)
 
 
 # User input method?
@@ -24,15 +24,22 @@ user_input = 1
 # Save the data?
 save_data = 0
 
-#Variables
-scan_time = 60
-scan_increment = 0.2
+
 
 #######################
 if user_input == 1:
-	scan_time = int(raw_input("1scan time: "))
-	scan_increment = float(raw_input("scan increment: "))
-
+	scan_time = int(raw_input("\nscan time (s): \n"))
+	scan_increment = float(raw_input("\nscan increment (s): \n"))
+	while (scan_time/scan_increment) % 1 != 0:
+		scan_increment = float(raw_input("\n!not valid increment! \t new scan increment (s): \n"))
+else:
+	scan_time = 60
+	scan_increment = 0.2
+	print("\nscan time: ")
+	print(scan_time)
+	print("\nscan increment:")
+	print(scan_increment)
+	time.sleep(2)
 
 
 def read_touchscreen():
