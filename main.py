@@ -3,23 +3,36 @@ import numpy as np
 import os
 import time
 from threading import Thread
-
+import pickle
 
 devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 
-print("Devices:")
+print("devices:")
 for q in devices:
 	if q.name == "FT5406 memory based driver":
 		device = evdev.InputDevice(q.fn)
 	print(q.fn, q.name, q.phys)
 
-print("Picked device:")
+print("picked device:")
 print(device)
 time.sleep(2)
 
-#### Scan Time (s) ####
-scan_time = 10;
+
+# User input method?
+user_input = 1
+
+# Save the data?
+save_data = 0
+
+#Variables
+scan_time = 60
+scan_increment = 0.2
+
 #######################
+if user_input == 1:
+	scan_time = int(raw_input("scan time: "))
+	scan_increment = float(raw_input("scan increment: "))
+
 
 
 def read_touchscreen():
@@ -45,12 +58,12 @@ def update_location():
 	prev_time = time.time()
 	global itteration
 	itteration = 0
-	loc_matrix = np.zeros((60,10,2))
+	loc_matrix = np.zeros((int(scan_time/scan_increment),10,2))
 	while 1:
-		if ((time.time() - prev_time) > 1):
-			if (itteration < scan_time):
+		if ((time.time() - prev_time) > scan_increment):
+			if (itteration*scan_increment < scan_time):
 			    os.system('clear')
-			    current_seconds = "Time: %d out of %d (s)" % (itteration+1,scan_time)
+			    current_seconds = "time: %.2f out of %d (s)" % (scan_increment*(itteration+1),scan_time)
 			    print(current_seconds)
 			    print(locations)
 
@@ -58,23 +71,18 @@ def update_location():
 			    prev_time = time.time()
 			    itteration += 1
 			else:
-				np.save("loc_matrix",loc_matrix)
-				print("done!")
+				#Save the data
+				if save_data == 1:
+					saving_data = [scan_time,scan_increment,loc_matrix]
+					fileObject = open("stored_data",'wb')
+					pickle.dump(saving_data,fileObject)
+					fileObject.close()
+					print("saved!")
+				else:
+					print("done!")
+				# np.save("loc_matrix",loc_matrix)
 				os._exit(1)
 
-
-# def store_data():
-# 	prev_time = time.time()
-# 	while 1:
-# 		if (time.time() - prev_time) > 5:
-# 		    prev_time = time.time()
-# 		    im = np.zeros((480,800))
-# 		    plt.plot(im)
-	# Let's make an image!
-    # im = np.zeros((480,800))
-
-#     for i in range(0,locations.shape[0]):
-#     	im[locations[i,1], locations[i,0]] = 1
 
 Thread(target = read_touchscreen).start()
 Thread(target = update_location).start()
