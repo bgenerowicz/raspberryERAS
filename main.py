@@ -30,7 +30,7 @@ scan_increment = 0.2
 
 #######################
 if user_input == 1:
-	scan_time = int(raw_input("scan time: "))
+	scan_time = int(raw_input("1scan time: "))
 	scan_increment = float(raw_input("scan increment: "))
 
 
