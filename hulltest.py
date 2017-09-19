@@ -231,6 +231,9 @@ def make_plots(current_locations,hull):
 def hull_test(current_locations):
     x = current_locations[:, 0]
     x_left, idx = min((val, idx) for (idx, val) in enumerate(x))
+    # min_num = np.nanmin(x)
+    # idx = x.tolist().index(min_num)
+
     leftpoint = idx
     points = range(0,current_locations.shape[0])
 
@@ -242,14 +245,20 @@ def hull_test(current_locations):
     while hull[0] != check_for_complete:
         for q in points:
             if (q != p):
-                np = next_point(p,q,points,current_locations)
+                nxtp = next_point(p,q,points,current_locations)
 
-                if np:
+                if nxtp:
                     check_for_complete = q
                     hull.append(q)
                     break
         p = q
-    return hull
+
+    hull_locs = np.zeros((len(hull),2))
+    for i in range(0,hull_locs.shape[0]):
+        hull_locs[i] =  current_locations[hull[i]]
+
+    return hull_locs
+    # return hull
 
 def radius_matrix(current_locations):
     n = current_locations.shape[0]
@@ -275,31 +284,84 @@ def extract_data():
 
     scan_time, scan_increment, loc_matrix = pickle.load(fileObject)
 
-    return loc_matrix[180]
+    end = 1
+    return loc_matrix[185]
 
-def determine_locations(r_matrix,num_mice,max_length):
+def determine_locations(current_locations,r_matrix,num_mice,max_length):
     #pseudocode:
     #- start on the left, look at nodes in range (up to 3 other nodes)
     #- exclude them all from the list
     #- start on other extreme and do the same
     #
 
+    #Find most left point
+    x = current_locations[:, 0]
+    x_left, idx = min((val, idx) for (idx, val) in enumerate(x))
+
+    #Total number of points (can't use the same point twice)
     n = r_matrix.shape[0]
+    points = range(0,n)
+
+
+
+
+    #Set positions > max_length in r_matrix to zeros, else 1
     for i in range(0,n):
         for j in range(0,n):
             if (r_matrix[i,j]>max_length):
-                r_matrix[i, j] = 0
+                r_matrix[i, j] = np.nan
             else:
                 r_matrix[i, j] = 1
 
-    end = 1
+    # # Make new locations based on points within range
+    new_locs = np.zeros(current_locations.shape)
+    new_locs[:,0] = r_matrix[idx, :] * current_locations[:,0]
+    new_locs[:, 1] = r_matrix[idx, :] * current_locations[:, 1]
+
+    #Find nans to remove them
+    ind = np.where(np.isnan(new_locs[:,0]))[0]
+    final_locs = np.zeros((n-len(ind), 2))
+    final_locs[:,0] = np.delete(new_locs[:,0],ind)
+    final_locs[:, 1] = np.delete(new_locs[:,1],ind)
+
+    return final_locs
+    # return new_locs
+    # save_nans = []
+    # for i in range(0,n):
+    #     if new_locs[i,0] == 'nan':
+    #         print("1")
+    #         save_nans.append(i)
 
 
+    # #hull?
+    # hull = []
+    # for i in range(0,n):
+    #     if r_matrix[idx, i] == 1:
+    #         hull.append(i)
+    #
+    # return hull
+
+def make_hull_plots(current_locations,hull_locs):
+
+
+    plt.axis([0, 800, 0, 480])
+    plt.gca().invert_yaxis()
+    plt.ion()
+
+
+    plt.plot(current_locations[:, 0], current_locations[:, 1], "*b")
+
+    x = hull_locs[:,0]
+    y = hull_locs[:,1]
+
+    plt.plot(x,y,"r")
+    plt.plot(x, y, "*r")
+    plt.show(block='true')
 
 def main():
     #Variables
     num_mice = 2
-    max_length = 300
+    max_length = 250
 
 
     # current_locations = np.random.rand(10, 2)
@@ -313,12 +375,14 @@ def main():
 
 
     current_locations = extract_data()
+    current_locations = extract_data()
     r_matrix = radius_matrix(current_locations)
 
-    mice_locations = determine_locations(r_matrix,num_mice,max_length)
+    mice_locations = determine_locations(current_locations,r_matrix,num_mice,max_length)
 
-    hull = hull_test(current_locations)
-    make_plots(current_locations, hull)
+    hull_locs = hull_test(mice_locations)
+    # make_plots(current_locations, hull)
+    make_hull_plots(current_locations,hull_locs)
     end = 1
 
 if __name__ == "__main__":
