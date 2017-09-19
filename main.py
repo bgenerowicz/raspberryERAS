@@ -36,25 +36,27 @@ for q in devices:
 #Update user
 print("\npicked device:")
 print(device)
-print("\nscan time:")
-print(int(args.integers[0]))
-print("\nscan increment:")
-print(args.integers[1])
-print("\nsave?:")
+print("\nscan time / scan increment / save")
 if args.integers[2]:
-	print("yes")
+	temp = 'yes'
 else:
-	print("no")
+	temp = 'no'
+
+printstr = str(int(args.integers[0])) + "     \t/ " + str(args.integers[1]) + " \t\t/ " + temp
+print(printstr)
 
 
-time.sleep(5)
+
+
+time.sleep(3)
 
 
 
 def read_touchscreen():
 	#Variables
 	global locations
-	locations = np.zeros((10,2))
+	locations = np.empty((10,2))
+	locations[:] = np.nan
 	finger = 0
 
 	for event in device.read_loop():   #Read the device loop 
@@ -67,14 +69,15 @@ def read_touchscreen():
 	                                locations[finger,1] = event.value
 			if event.code == evdev.ecodes.ABS_MT_TRACKING_ID:
 				if event.value == -1:
-					locations[finger,0] = 0
-					locations[finger,1] = 0
+					locations[finger,0] = np.nan
+					locations[finger,1] = np.nan
 
 def update_location():
 	prev_time = time.time()
 	global itteration
 	itteration = 0
-	loc_matrix = np.zeros((int(scan_time/scan_increment),10,2))
+	loc_matrix = np.empty((int(scan_time/scan_increment),10,2))
+	loc_matrix[:] = np.nan
 	while 1:
 		if ((time.time() - prev_time) > scan_increment):
 			if (itteration*scan_increment < scan_time):
