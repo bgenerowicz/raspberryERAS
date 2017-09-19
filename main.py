@@ -7,6 +7,11 @@ import pickle
 
 devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 
+# Work out current path for save
+abspath = os.path.abspath(__file__)
+dname = os.path.dirname(abspath)
+os.chdir(dname)
+
 print("\ndevices:")
 for q in devices:
 	if q.name == "FT5406 memory based driver":
@@ -22,7 +27,7 @@ print(device)
 user_input = 1
 
 # Save the data?
-save_data = 0
+save_data = 1
 
 
 
@@ -80,8 +85,9 @@ def update_location():
 			else:
 				#Save the data
 				if save_data == 1:
+					save_name = "data/" + "data_" + str(scan_time) + "_" + str(scan_increment)
 					saving_data = [scan_time,scan_increment,loc_matrix]
-					fileObject = open("stored_data",'wb')
+					fileObject = open(save_name,'w+')
 					pickle.dump(saving_data,fileObject)
 					fileObject.close()
 					print("saved!")
