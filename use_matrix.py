@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -12,8 +14,6 @@ scroll_speed = 20
 scan_time = 50
 scan_increment = 0.2
 save_name = "data/data_" + str(scan_time) + "_" + str(scan_increment)
-
-
 fileObject = open(save_name,'r')
 
 scan_time,scan_increment,loc_matrix = pickle.load(fileObject)
@@ -22,13 +22,11 @@ print("total scan time: " + str(scan_time) + " seconds")
 print("scan increment: " + str(scan_increment) + " seconds")
 
 ########
-
+#Plot the locations itteratively
 plt.axis([0,800,0,480])
 plt.gca().invert_yaxis()
 plt.ion()
-
 loc_matrix[loc_matrix == 0] = 'nan'
-
 
 for j in range(0,loc_matrix.shape[0]):
     itter_loc = loc_matrix[j]
@@ -41,8 +39,20 @@ for j in range(0,loc_matrix.shape[0]):
     # plt.pause(1e-6)
     plt.pause(1e-2)
     paths.remove()
+    
+    end = 1
 
 plt.show(block=True)
+
+
+
+
+
+
+
+
+
+
 
 ###################
 # Other approach using im_grid (slower)

@@ -1,50 +1,54 @@
+#!/usr/bin/env python
+
 import evdev
 import numpy as np
 import os
 import time
 from threading import Thread
 import pickle
-
-devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
+import argparse
 
 # Work out current path for save
 abspath = os.path.abspath(__file__)
 dname = os.path.dirname(abspath)
 os.chdir(dname)
 
+
+#Parser used to take arguments
+parser = argparse.ArgumentParser(description='Scan time | scan increment | save data')
+parser.add_argument('integers', metavar='N', type=float, nargs='+',
+                    help='Scan time | scan increment | save data')
+args = parser.parse_args()
+scan_time = args.integers[0]
+scan_increment = args.integers[1]
+save_data = args.integers[2]
+
+
+#Making sure you pick the touchsceen
+devices = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 print("\ndevices:")
 for q in devices:
 	if q.name == "FT5406 memory based driver":
 		device = evdev.InputDevice(q.fn)
 	print(q.fn, q.name, q.phys)
 
+
+#Update user
 print("\npicked device:")
 print(device)
-# time.sleep(2)
-
-
-# User input method?
-user_input = 1
-
-# Save the data?
-save_data = 1
-
-
-
-#######################
-if user_input == 1:
-	scan_time = int(raw_input("\nscan time (s): \n"))
-	scan_increment = float(raw_input("\nscan increment (s): \n"))
-	while (scan_time/scan_increment) % 1 != 0:
-		scan_increment = float(raw_input("\n!not valid increment! \t new scan increment (s): \n"))
+print("\nscan time:")
+print(int(args.integers[0]))
+print("\nscan increment:")
+print(args.integers[1])
+print("\nsave?:")
+if args.integers[2]:
+	print("yes")
 else:
-	scan_time = 60
-	scan_increment = 0.2
-	print("\nscan time: ")
-	print(scan_time)
-	print("\nscan increment:")
-	print(scan_increment)
-	time.sleep(2)
+	print("no")
+
+
+time.sleep(5)
+
 
 
 def read_touchscreen():
