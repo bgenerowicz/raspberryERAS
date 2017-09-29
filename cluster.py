@@ -39,17 +39,25 @@ def cluster(current_locations,mice_number):
 def remove_nans(itter_loc):
     # Find nans to remove them
     n = itter_loc.shape[0]
+
+    #Remove from y
     ind = np.where(np.isnan(itter_loc[:, 1]))[0]
     final_locs = np.zeros((n - len(ind), 2))
     final_locs[:, 0] = np.delete(itter_loc[:, 0], ind)
     final_locs[:, 1] = np.delete(itter_loc[:, 1], ind)
 
-    return final_locs
+    #Remove from x
+    ind2 = np.where(np.isnan(final_locs[:, 0]))[0]
+    final_locs2 = np.zeros((len(final_locs) - len(ind2), 2))
+    final_locs2[:, 0] = np.delete(final_locs[:, 0], ind2)
+    final_locs2[:, 1] = np.delete(final_locs[:, 1], ind2)
+
+    return final_locs2
 
 def main():
     n = 2 #Number of mice
-    scan_time = 50
-    scan_increment = 0.2
+    scan_time = 10.0
+    scan_increment = 0.1
 
     scan_time, scan_increment, loc_matrix = extract_data(scan_time,scan_increment)
 
