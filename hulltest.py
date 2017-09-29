@@ -242,6 +242,14 @@ def hull_test(current_locations):
 
     p = leftpoint
     check_for_complete = []
+
+    #Safety
+    if current_locations.shape[0] < 3:
+        print("no mouse")
+        return 0
+    else:
+        print("good")
+
     while hull[0] != check_for_complete:
         for q in points:
             if (q != p):
@@ -277,15 +285,19 @@ def extract_data():
     scroll_speed = 20
 
     # loc_matrix = np.load("loc_matrix.npy")
-    scan_time = 50
-    scan_increment = 0.2
+    # scan_time = 50
+    # scan_increment = 0.2
+    scan_time = 5.0
+    scan_increment = 1.0
+
+
     save_name = "data/data_" + str(scan_time) + "_" + str(scan_increment)
     fileObject = open(save_name, 'r')
 
     scan_time, scan_increment, loc_matrix = pickle.load(fileObject)
 
     end = 1
-    return loc_matrix[185]
+    return loc_matrix[1]  #good: 180,185
 
 def determine_locations(current_locations,r_matrix,num_mice,max_length):
     #pseudocode:
@@ -341,27 +353,41 @@ def determine_locations(current_locations,r_matrix,num_mice,max_length):
     #
     # return hull
 
-def make_hull_plots(current_locations,hull_locs):
-
-
+def make_basic_plot(current_locations):
     plt.axis([0, 800, 0, 480])
     plt.gca().invert_yaxis()
     plt.ion()
 
-
     plt.plot(current_locations[:, 0], current_locations[:, 1], "*b")
 
-    x = hull_locs[:,0]
-    y = hull_locs[:,1]
+def make_hull_plots(hull_locs):
+    x = hull_locs[:, 0]
+    y = hull_locs[:, 1]
 
-    plt.plot(x,y,"r")
+    plt.plot(x, y, "r")
     plt.plot(x, y, "*r")
-    plt.show(block='true')
+
+# def make_hull_plots(current_locations,hull_locs):
+#
+#
+#     plt.axis([0, 800, 0, 480])
+#     plt.gca().invert_yaxis()
+#     plt.ion()
+#
+#
+#     plt.plot(current_locations[:, 0], current_locations[:, 1], "*b")
+#
+#     x = hull_locs[:,0]
+#     y = hull_locs[:,1]
+#
+#     plt.plot(x,y,"r")
+#     plt.plot(x, y, "*r")
+#     plt.show(block='true')
 
 def main():
     #Variables
     num_mice = 2
-    max_length = 250
+    max_length = 400
 
 
     # current_locations = np.random.rand(10, 2)
@@ -375,14 +401,18 @@ def main():
 
 
     current_locations = extract_data()
-    current_locations = extract_data()
     r_matrix = radius_matrix(current_locations)
 
+    # for i in range(0,num_mice):
     mice_locations = determine_locations(current_locations,r_matrix,num_mice,max_length)
-
     hull_locs = hull_test(mice_locations)
+
+
     # make_plots(current_locations, hull)
-    make_hull_plots(current_locations,hull_locs)
+    if hull_locs.any():
+        make_basic_plot(current_locations)
+        make_hull_plots(hull_locs)
+        plt.show(block='true')
     end = 1
 
 if __name__ == "__main__":
